@@ -56,29 +56,23 @@ mkdir -p $VENDORING_DIR
 # change to vendoring dir to install apache ant
 cd $VENDORING_DIR
 
-if [ -x $ANT_HOME/bin/ant ] ; then
-    #assuming Apache Ant is already installed...
-	echo "-----> Using Apache Ant $ANT_VER....."
+if [ ! -f $BUILD_DIR/gradlew ] ; then
+    echo "-----> Gradle wrapper is missing!"
+    exit 1
 else
-	echo "-----> Installing Apache Ant $ANT_VER..... [start]"
-	curl --max-time 180 --location $ANT_URL | tar xz
-	chmod +x $ANT_HOME/bin/ant
-	echo "-----> Installing Apache Ant $ANT_VER..... [done ]!"
+    echo "-----> Using Gradle wrapper ..."
 fi
 
-
-if [ ! -f $BUILD_DIR/build.xml ] ; then
-	echo "Failed to build app with Apache Ant"
+if [ ! -f $BUILD_DIR/build.gradle ] ; then
+    echo "-----> Gradle build script is missing!"
+    exit 1
 fi
-
 
 # change to build dir to run ant
 cd ${BUILD_DIR}
 
-export ANT_OPTS="-Xmx512m"
-
 # build app
-BUILDCMD="$ANT_HOME/bin/ant -Duser.home=${BUILD_DIR}"
+BUILDCMD="$BUILD_DIR/gradlew build"
 echo "-----> executing $BUILDCMD"
 
 $BUILDCMD 2>&1 | indent
@@ -87,6 +81,6 @@ ls -al ${PWD}  | indent
 ls -al ${BUILD_DIR}  | indent
 
 if [ "${PIPESTATUS[*]}" != "0 0" ]; then
-  echo " !     Failed to build app with Apache Ant"
+  echo " !     Failed to build app with Gradle"
   exit 1
 fi
